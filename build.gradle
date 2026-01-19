@@ -1,15 +1,13 @@
 plugins {
-	id 'fabric-loom' version '1.4-SNAPSHOT'
+	id 'fabric-loom' version '1.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
-
-archivesBaseName = project.archives_base_name
-version = project.mod_version
-group = project.maven_group
-
+base {
+	archivesName = project.archives_base_name
+	version = project.mod_version
+	group = project.maven_group
+}
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -32,6 +30,8 @@ tasks.withType(JavaCompile).configureEach {
 
 java {
 	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
 jar {
@@ -44,7 +44,7 @@ jar {
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			artifactId archivesBaseName
+			artifactId project.archives_base_name
 			from components.java
 		}
 	}
