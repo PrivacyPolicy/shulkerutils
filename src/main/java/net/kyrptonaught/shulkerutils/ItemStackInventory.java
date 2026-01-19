@@ -1,11 +1,11 @@
 package net.kyrptonaught.shulkerutils;
 
 
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.collection.DefaultedList;
 
 
@@ -20,40 +20,25 @@ public class ItemStackInventory extends SimpleInventory {
     }
 
     public static DefaultedList<ItemStack> getStacks(ItemStack usedStack, int SIZE) {
-        NbtCompound compoundTag = usedStack.getSubNbt("BlockEntityTag");
         DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(SIZE, ItemStack.EMPTY);
-        if (compoundTag != null && compoundTag.contains("Items", 9)) {
-            Inventories.readNbt(compoundTag, itemStacks);
-        }
+        if (!usedStack.contains(DataComponentTypes.CONTAINER)) return itemStacks;
+        ContainerComponent containerComponent = usedStack.get(DataComponentTypes.CONTAINER);
+        containerComponent.copyTo(itemStacks);
         return itemStacks;
     }
 
     @Override
     public void markDirty() {
         super.markDirty();
-        NbtCompound blockEntityTag = itemStack.getSubNbt("BlockEntityTag");
-        if (blockEntityTag == null)
-            blockEntityTag = itemStack.getOrCreateSubNbt("BlockEntityTag");
-
-        if (isEmpty()) {
-            if (blockEntityTag.contains("Items")) blockEntityTag.remove("Items");
-        } else {
+        if (!isEmpty()) {
             DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(SIZE, ItemStack.EMPTY);
             for (int i = 0; i < size(); i++) {
                 itemStacks.set(i, getStack(i));
             }
-            Inventories.writeNbt(blockEntityTag, itemStacks);
+            itemStack.set(DataComponentTypes.CONTAINER, ContainerComponent.fromStacks(itemStacks));
+        } else {
+            itemStack.remove(DataComponentTypes.CONTAINER);
         }
-
-        if (shouldDeleteNBT(blockEntityTag)) {
-            itemStack.removeSubNbt("BlockEntityTag");
-        }
-    }
-
-    public boolean shouldDeleteNBT(NbtCompound blockEntityTag) {
-        if (!blockEntityTag.contains("Items"))
-            return blockEntityTag.getKeys().size() == 0;
-        return isEmpty();
     }
 
     @Override
@@ -64,6 +49,5 @@ public class ItemStackInventory extends SimpleInventory {
             playerEntity_1.giveItemStack(new ItemStack(itemStack.getItem(), count - 1));
         }
         markDirty();
-        // itemStack.removeSubTag(QuickShulkerMod.MOD_ID);
     }
 }
