@@ -3,7 +3,7 @@ package net.kyrptonaught.shulkerutils;
 
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.ContainerUser;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
@@ -42,11 +42,11 @@ public class ItemStackInventory extends SimpleInventory {
     }
 
     @Override
-    public void onClose(PlayerEntity playerEntity_1) {
+    public void onClose(ContainerUser user) {
         if (itemStack.getCount() > 1) {
             int count = itemStack.getCount();
             itemStack.setCount(1);
-            playerEntity_1.giveItemStack(new ItemStack(itemStack.getItem(), count - 1));
+            user.asLivingEntity().giveOrDropStack(new ItemStack(itemStack.getItem(), count - 1));
         }
         markDirty();
     }
