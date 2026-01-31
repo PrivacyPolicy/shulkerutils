@@ -1,15 +1,15 @@
 package net.kyrptonaught.shulkerutils;
 
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ContainerComponent;
-import net.minecraft.entity.ContainerUser;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.ContainerUser;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 
 
-public class ItemStackInventory extends SimpleInventory {
+public class ItemStackInventory extends SimpleContainer {
     protected final ItemStack itemStack;
     protected final int SIZE;
 
@@ -19,35 +19,35 @@ public class ItemStackInventory extends SimpleInventory {
         this.SIZE = SIZE;
     }
 
-    public static DefaultedList<ItemStack> getStacks(ItemStack usedStack, int SIZE) {
-        DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(SIZE, ItemStack.EMPTY);
-        if (!usedStack.contains(DataComponentTypes.CONTAINER)) return itemStacks;
-        ContainerComponent containerComponent = usedStack.get(DataComponentTypes.CONTAINER);
-        containerComponent.copyTo(itemStacks);
+    public static NonNullList<ItemStack> getStacks(ItemStack usedStack, int SIZE) {
+        NonNullList<ItemStack> itemStacks = NonNullList.withSize(SIZE, ItemStack.EMPTY);
+        if (!usedStack.has(DataComponents.CONTAINER)) return itemStacks;
+        ItemContainerContents containerComponent = usedStack.get(DataComponents.CONTAINER);
+        containerComponent.copyInto(itemStacks);
         return itemStacks;
     }
 
     @Override
-    public void markDirty() {
-        super.markDirty();
+    public void setChanged() {
+        super.setChanged();
         if (!isEmpty()) {
-            DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(SIZE, ItemStack.EMPTY);
-            for (int i = 0; i < size(); i++) {
-                itemStacks.set(i, getStack(i));
+            NonNullList<ItemStack> itemStacks = NonNullList.withSize(SIZE, ItemStack.EMPTY);
+            for (int i = 0; i < getContainerSize(); i++) {
+                itemStacks.set(i, getItem(i));
             }
-            itemStack.set(DataComponentTypes.CONTAINER, ContainerComponent.fromStacks(itemStacks));
+            itemStack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(itemStacks));
         } else {
-            itemStack.remove(DataComponentTypes.CONTAINER);
+            itemStack.remove(DataComponents.CONTAINER);
         }
     }
 
     @Override
-    public void onClose(ContainerUser user) {
+    public void stopOpen(ContainerUser user) {
         if (itemStack.getCount() > 1) {
             int count = itemStack.getCount();
             itemStack.setCount(1);
-            user.asLivingEntity().giveOrDropStack(new ItemStack(itemStack.getItem(), count - 1));
+            user.getLivingEntity().handleExtraItemsCreatedOnUse(new ItemStack(itemStack.getItem(), count - 1));
         }
-        markDirty();
+        setChanged();
     }
 }

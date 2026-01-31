@@ -1,7 +1,7 @@
 package net.kyrptonaught.shulkerutils.mixin;
 
 import net.kyrptonaught.shulkerutils.UpgradableShulker;
-import net.minecraft.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ShulkerBoxBlock.class)

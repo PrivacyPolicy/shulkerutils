@@ -1,32 +1,32 @@
 package net.kyrptonaught.shulkerutils;
 
 
-import net.minecraft.block.Block;
-import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
 
 public class ShulkerUtils {
     public static boolean isShulkerItem(ItemStack item) {
-        return Block.getBlockFromItem(item.getItem()) instanceof ShulkerBoxBlock;
+        return Block.byItem(item.getItem()) instanceof ShulkerBoxBlock;
     }
 
-    public static boolean shulkerContainsAny(Inventory shulkerInv, ItemStack stack) {
-        for (int i = 0; i < shulkerInv.size(); i++) {
-            if (shulkerInv.getStack(i).getItem().equals(stack.getItem()))
+    public static boolean shulkerContainsAny(Container shulkerInv, ItemStack stack) {
+        for (int i = 0; i < shulkerInv.getContainerSize(); i++) {
+            if (shulkerInv.getItem(i).getItem().equals(stack.getItem()))
                 return true;
         }
         return false;
     }
 
-    public static ItemStack insertIntoShulker(SimpleInventory shulkerInv, ItemStack stack, PlayerEntity player) {
-        if (isShulkerItem(stack) || !shulkerInv.canInsert(stack))
+    public static ItemStack insertIntoShulker(SimpleContainer shulkerInv, ItemStack stack, Player player) {
+        if (isShulkerItem(stack) || !shulkerInv.canAddItem(stack))
             return stack;
-        ItemStack output = shulkerInv.addStack(stack);
-        shulkerInv.onClose(player);
+        ItemStack output = shulkerInv.addItem(stack);
+        shulkerInv.stopOpen(player);
         return output;
     }
 
